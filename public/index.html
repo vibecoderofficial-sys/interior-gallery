@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interior Works</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap">
+<style>
+:root{--bg:#f6f2ec;--surface:#ece6dc;--ink:#1d1a17;--mute:#7a7066;--accent:#a9783b;--line:rgba(29,26,23,.14);--ov:rgba(246,242,236,.92);
+--serif:"Cormorant Garamond",Georgia,serif;--sans:Inter,system-ui,sans-serif;--ease:cubic-bezier(.77,0,.175,1)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121110;--surface:#1c1a18;--ink:#f1ebe2;--mute:#9a9187;--accent:#c9a064;--line:rgba(241,235,226,.14);--ov:rgba(18,17,16,.92);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121110;--surface:#1c1a18;--ink:#f1ebe2;--mute:#9a9187;--accent:#c9a064;--line:rgba(241,235,226,.14);--ov:rgba(18,17,16,.92);color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;overflow-x:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{padding:56px 6vw 28px;max-width:1300px;margin:auto}
+.eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(40px,7vw,84px);line-height:1;margin:14px 0 16px}
+header p{color:var(--mute);max-width:46ch;line-height:1.7}
+#home,#album{transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.grid{max-width:1300px;margin:auto;padding:20px 6vw 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+.card{position:relative;aspect-ratio:3/4;overflow:hidden;border-radius:4px;cursor:pointer;background:var(--surface);border:0;padding:0;text-align:left;color:#fff;opacity:0;transform:translateY(30px);animation:rise .9s var(--ease) forwards}
+.card img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.card:hover img{transform:scale(1.07)}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(0,0,0,.72))}
+.card .t{position:absolute;left:22px;right:22px;bottom:20px;z-index:1}
+.card h2{font-family:var(--serif);font-weight:500;font-size:30px}
+.card span{font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
+.card .arr{position:absolute;right:20px;top:18px;z-index:1;width:38px;height:38px;border:1px solid rgba(255,255,255,.5);border-radius:50%;display:grid;place-items:center;transition:.5s var(--ease)}
+.card:hover .arr{background:#fff;color:#111;transform:rotate(-45deg)}
+@keyframes rise{to{opacity:1;transform:none}}
+#album{position:fixed;inset:0;background:var(--bg);z-index:5;display:flex;flex-direction:column;opacity:0;transform:translateY(40px);visibility:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body.open #album{opacity:1;transform:none;visibility:visible}
+body.open #home{opacity:0;transform:scale(.98)}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:20px calc(5vw + 62px) 20px 5vw}
+.bar button{background:none;border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:40px;font:inherit;font-size:12px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:.4s}
+.bar button:hover{border-color:var(--accent);color:var(--accent)}
+.bar h3{font-family:var(--serif);font-weight:500;font-size:clamp(22px,3.4vw,34px)}
+.bar .c{font-size:12px;letter-spacing:.2em;color:var(--mute);min-width:70px;text-align:right}
+.stage{position:relative;flex:1;min-height:0;overflow:hidden}
+.track{display:flex;height:100%;transition:transform .85s var(--ease)}
+.slide{flex:0 0 100%;height:100%;position:relative;display:grid;place-items:center;overflow:hidden}
+.slide .bl{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(40px) brightness(.55);opacity:.7}
+.slide .m{position:relative;max-width:92%;max-height:94%;object-fit:contain;border-radius:3px;box-shadow:0 30px 80px rgba(0,0,0,.35);transform:scale(1.06);opacity:.4;transition:transform 1.1s var(--ease),opacity .9s}
+.slide.on .m{transform:none;opacity:1}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:20px;cursor:pointer;z-index:3;transition:.4s}
+.nav:hover{background:var(--accent);border-color:var(--accent)}
+.prev{left:3vw}.next{right:3vw}
+.thumbs{display:flex;gap:10px;padding:14px 5vw 18px;overflow-x:auto;justify-content:center}
+.thumbs button{flex:0 0 auto;width:54px;height:72px;border:0;padding:0;border-radius:3px;overflow:hidden;cursor:pointer;opacity:.45;outline:2px solid transparent;outline-offset:2px;transition:.5s var(--ease);background:var(--surface)}
+.thumbs button img{width:100%;height:100%;object-fit:cover}
+.thumbs button.on{opacity:1;outline-color:var(--accent);transform:translateY(-4px)}
+footer{text-align:center;color:var(--mute);font-size:12px;letter-spacing:.2em;padding:0 0 50px}
+#mbtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);right:5vw;z-index:30;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--ov);color:var(--ink);font-size:18px;cursor:pointer;backdrop-filter:blur(8px);transition:.4s}
+#mbtn:hover{border-color:var(--accent);color:var(--accent)}
+#menu{position:fixed;top:calc(env(safe-area-inset-top,0px) + 70px);right:5vw;z-index:30;min-width:210px;background:var(--ov);border:1px solid var(--line);border-radius:10px;padding:8px;backdrop-filter:blur(14px);opacity:0;transform:translateY(-8px);pointer-events:none;transition:.4s var(--ease)}
+#menu.show{opacity:1;transform:none;pointer-events:auto}
+#menu a,#menu button{display:block;width:100%;text-align:left;padding:12px 14px;background:none;border:0;color:var(--ink);font:inherit;font-size:13px;letter-spacing:.08em;text-decoration:none;border-radius:6px;cursor:pointer}
+#menu a:hover,#menu button:hover{background:var(--surface)}
+#modal{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.55);display:grid;place-items:center;opacity:0;pointer-events:none;transition:.4s;padding:20px}
+#modal.show{opacity:1;pointer-events:auto}
+.box{width:min(440px,100%);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:26px;display:grid;gap:14px;max-height:90vh;overflow:auto;transform:translateY(20px);transition:.5s var(--ease)}
+#modal.show .box{transform:none}
+.box h4{font-family:var(--serif);font-weight:500;font-size:28px}
+.box label{display:grid;gap:6px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.box input,.box select{padding:11px 12px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;font:inherit;font-size:14px;letter-spacing:0;text-transform:none}
+.row{display:flex;gap:10px;justify-content:flex-end}
+.row button{padding:11px 22px;border-radius:40px;border:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-size:12px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+.row .pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.row button:disabled{opacity:.5;cursor:wait}
+#log{font-size:12px;color:var(--mute);line-height:1.7;max-height:140px;overflow:auto}
+@media(max-width:600px){.nav{width:40px;height:40px}.grid{gap:14px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style></head><body>
+
+<button id="mbtn" aria-label="Menu">☰</button>
+<nav id="menu"></nav>
+
+<div id="home">
+<header><div class="eyebrow">Portfolio</div><h1 id="h1"></h1><p id="tag"></p></header>
+<div class="grid" id="grid"></div><footer>CRAFTED SPACES</footer>
+</div>
+
+<section id="album" aria-label="Album">
+<div class="bar"><button id="back">← Albums</button><h3 id="ttl"></h3><div class="c" id="cnt"></div></div>
+<div class="stage"><div class="track" id="track"></div><button class="nav prev" aria-label="Previous">←</button><button class="nav next" aria-label="Next">→</button></div>
+<div class="thumbs" id="thumbs"></div>
+</section>
+
+<div id="modal"><div class="box">
+<h4>Upload photos</h4>
+<label>Password<input id="pw" type="password" autocomplete="current-password"></label>
+<label>Album<select id="alb"></select></label>
+<label id="nl" hidden>New album name<input id="nn" placeholder="e.g. Bedroom" maxlength="40"></label>
+<label>Photos<input id="files" type="file" accept="image/*" multiple></label>
+<div id="log"></div>
+<div class="row"><button id="cancel">Close</button><button id="go" class="pri">Upload</button></div>
+</div></div>
+
+<script>
+/* ===== Customize here ===== */
+const CONFIG={
+  title:'Interior Works',
+  tagline:'A curated collection of our finished spaces. Choose an album to explore each project in detail.',
+  // Extra menu links, e.g. {label:'WhatsApp',href:'https://wa.me/91XXXXXXXXXX'}, {label:'Instagram',href:'https://instagram.com/yourpage'}
+  links:[],
+  // false = Upload / New album appear in the menu only after opening the site once with ?admin at the end of the address
+  alwaysShowAdmin:false
+};
+/* ========================== */
+const $=s=>document.querySelector(s),grid=$('#grid'),track=$('#track'),thumbs=$('#thumbs'),menu=$('#menu'),modal=$('#modal');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slugify=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
+let ALBUMS=[],cur=null,i=0,PW=sessionStorage.getItem('gpw')||'';
+let ADMIN=CONFIG.alwaysShowAdmin||location.search.includes('admin');
+try{if(location.search.includes('admin'))localStorage.setItem('gadmin','1');if(localStorage.getItem('gadmin'))ADMIN=true}catch(e){}
+document.title=CONFIG.title;$('#h1').textContent=CONFIG.title;$('#tag').textContent=CONFIG.tagline;
+
+function buildMenu(){
+  menu.innerHTML='';
+  CONFIG.links.forEach(l=>{const a=document.createElement('a');a.href=l.href;a.target='_blank';a.rel='noopener';a.textContent=l.label;menu.appendChild(a)});
+  const add=(t,f)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{menu.classList.remove('show');f()};menu.appendChild(b)};
+  if(ADMIN){add('＋ Upload photos',()=>openModal(false));add('＋ New album',()=>openModal(true))}
+  add('◐ Light / Dark',()=>{const d=document.documentElement;const dark=d.dataset.theme?d.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;d.dataset.theme=dark?'light':'dark'});
+}
+$('#mbtn').onclick=e=>{e.stopPropagation();menu.classList.toggle('show')};
+addEventListener('click',e=>{if(!menu.contains(e.target))menu.classList.remove('show')});
+
+function renderGrid(){
+  grid.innerHTML='';
+  ALBUMS.forEach((a,n)=>{const b=document.createElement('button');b.className='card';b.style.animationDelay=(n*110+150)+'ms';
+    const c=a.items[0];
+    b.innerHTML=`<img alt="${esc(a.title)}" src="${c.poster||c.src}"><div class="arr">→</div><div class="t"><h2>${esc(a.title)}</h2><span>${a.items.length} ${a.items.length>1?'items':'item'}</span></div>`;
+    b.onclick=()=>{location.hash=a.id};grid.appendChild(b)});
+}
+function go(n){
+  i=Math.max(0,Math.min(cur.items.length-1,n));track.style.transform=`translateX(${-100*i}%)`;
+  [...track.children].forEach((s,k)=>{s.classList.toggle('on',k===i);const v=s.querySelector('video');if(v&&k!==i)v.pause()});
+  [...thumbs.children].forEach((t,k)=>t.classList.toggle('on',k===i));
+  $('#cnt').textContent=String(i+1).padStart(2,'0')+' / '+String(cur.items.length).padStart(2,'0');
+  thumbs.children[i].scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  $('.prev').style.visibility=i?'visible':'hidden';$('.next').style.visibility=i<cur.items.length-1?'visible':'hidden';
+}
+function openA(id,start=0){
+  const a=ALBUMS.find(x=>x.id===id);if(!a)return closeA();cur=a;$('#ttl').textContent=a.title;track.style.transition='none';
+  track.innerHTML=a.items.map(it=>it.type==='video'
+    ?`<div class="slide">${it.poster?`<img class="bl" alt="" src="${it.poster}">`:''}<video class="m" controls playsinline preload="metadata" poster="${it.poster||''}" src="${it.src}"></video></div>`
+    :`<div class="slide"><img class="bl" alt="" src="${it.src}"><img class="m" alt="${esc(a.title)}" src="${it.src}" loading="lazy"></div>`).join('');
+  thumbs.innerHTML=a.items.map((it,k)=>`<button aria-label="Go to ${k+1}"><img alt="" src="${it.poster||it.src}"></button>`).join('');
+  [...thumbs.children].forEach((t,k)=>t.onclick=()=>go(k));
+  document.body.classList.add('open');go(start);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>track.style.transition=''));
+}
+function closeA(){document.body.classList.remove('open');cur=null;document.querySelectorAll('video').forEach(v=>v.pause())}
+function route(){const h=location.hash.slice(1);h&&ALBUMS.length?openA(h):closeA()}
+addEventListener('hashchange',route);
+$('#back').onclick=()=>{location.hash=''};
+$('.prev').onclick=()=>go(i-1);$('.next').onclick=()=>go(i+1);
+addEventListener('keydown',e=>{if(modal.classList.contains('show')){if(e.key==='Escape')modal.classList.remove('show');return}
+  if(!cur)return;if(e.key==='ArrowRight')go(i+1);if(e.key==='ArrowLeft')go(i-1);if(e.key==='Escape')location.hash=''});
+let x0=null;const st=$('.stage');
+st.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+st.addEventListener('touchend',e=>{if(x0===null)return;const d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>50)go(i+(d<0?1:-1));x0=null});
+
+/* ---------- Upload ---------- */
+const log=m=>{$('#log').innerHTML+=m+'<br>';$('#log').scrollTop=1e6};
+function openModal(isNew){
+  $('#alb').innerHTML=ALBUMS.map(a=>`<option value="${a.id}">${esc(a.title)}</option>`).join('')+'<option value="__new">＋ New album…</option>';
+  $('#alb').value=isNew||!ALBUMS.length?'__new':(cur?cur.id:ALBUMS[0].id);
+  $('#alb').onchange();$('#pw').value=PW;$('#log').innerHTML='';$('#files').value='';modal.classList.add('show');
+}
+$('#alb').onchange=()=>{$('#nl').hidden=$('#alb').value!=='__new'};
+$('#cancel').onclick=()=>modal.classList.remove('show');
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove('show')};
+async function compress(file){
+  const bmp=await createImageBitmap(file),s=Math.min(1,1600/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
+  c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',.82);
+}
+async function post(body){
+  try{const r=await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({error:'Server error ('+r.status+')'}));return{ok:r.ok,...j}}catch(e){return{ok:false,error:'Network error'}}
+}
+$('#go').onclick=async()=>{
+  const files=[...$('#files').files],pw=$('#pw').value;
+  if(!pw)return log('Enter the password.');
+  const isNew=$('#alb').value==='__new',name=isNew?$('#nn').value.trim():$('#alb').value;
+  if(!name)return log('Enter an album name.');
+  if(!files.length)return log('Choose at least one photo.');
+  const slug=slugify(name),exists=ALBUMS.find(a=>a.id===slug);
+  const btn=$('#go');btn.disabled=true;$('#log').innerHTML='';
+  const v=await post({action:'verify',password:pw});
+  if(!v.ok){btn.disabled=false;return log(v.error||'Could not sign in.')}
+  PW=pw;sessionStorage.setItem('gpw',pw);
+  let done=0,titleSent=!!exists;
+  for(const [k,f] of files.entries()){
+    log(`Uploading ${k+1}/${files.length}: ${esc(f.name)}…`);
+    try{
+      const data=await compress(f);
+      const r=await post({password:pw,album:name,title:titleSent?undefined:name,filename:`u-${Date.now().toString(36)}-${k}.jpg`,data});
+      if(!r.ok){log('✗ '+esc(r.error||'Failed'));continue}
+      titleSent=true;done++;
+      let a=ALBUMS.find(x=>x.id===slug);if(!a){a={id:slug,title:name,items:[]};ALBUMS.push(a)}
+      a.items.push({type:'image',src:data});
+    }catch(e){log('✗ Could not read this image')}
+  }
+  btn.disabled=false;
+  if(done){log(`✓ ${done} saved to GitHub. Your site redeploys automatically; everyone sees them in about a minute.`);
+    renderGrid();if(cur&&cur.id===slug)openA(slug,cur.items.length-1)}
+};
+
+/* ---------- Start ---------- */
+buildMenu();
+fetch('gallery.json').then(r=>r.json()).then(d=>{ALBUMS=d;renderGrid();route()}).catch(()=>{grid.innerHTML='<p style="color:var(--mute)">Gallery could not be loaded.</p>'});
+</script></body></html>
