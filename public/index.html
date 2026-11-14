@@ -66,6 +66,13 @@ footer{text-align:center;color:var(--mute);font-size:12px;letter-spacing:.2em;pa
 .row .pri{background:var(--accent);border-color:var(--accent);color:#fff}
 .row button:disabled{opacity:.5;cursor:wait}
 #log{font-size:12px;color:var(--mute);line-height:1.7;max-height:140px;overflow:auto}
+#adm{display:flex;flex-wrap:wrap;gap:8px;padding:0 5vw 12px}
+#adm[hidden]{display:none}
+#adm button{padding:8px 16px;border-radius:40px;border:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.4s}
+#adm button:hover{border-color:var(--accent);color:var(--accent)}
+#adm .dg:hover{border-color:#c0392b;color:#c0392b}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translate(-50%,20px);z-index:50;max-width:min(520px,90vw);background:var(--ink);color:var(--bg);padding:13px 20px;border-radius:40px;font-size:13px;opacity:0;pointer-events:none;transition:.5s var(--ease)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:600px){.nav{width:40px;height:40px}.grid{gap:14px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style></head><body>
@@ -80,10 +87,12 @@ footer{text-align:center;color:var(--mute);font-size:12px;letter-spacing:.2em;pa
 
 <section id="album" aria-label="Album">
 <div class="bar"><button id="back">← Albums</button><h3 id="ttl"></h3><div class="c" id="cnt"></div></div>
+<div id="adm" hidden><button id="ren">✎ Rename album</button><button id="dph" class="dg">🗑 Delete this photo</button><button id="dal" class="dg">🗑 Delete album</button></div>
 <div class="stage"><div class="track" id="track"></div><button class="nav prev" aria-label="Previous">←</button><button class="nav next" aria-label="Next">→</button></div>
 <div class="thumbs" id="thumbs"></div>
 </section>
 
+<div id="toast"></div>
 <div id="modal"><div class="box">
 <h4>Upload photos</h4>
 <label>Password<input id="pw" type="password" autocomplete="current-password"></label>
@@ -145,7 +154,7 @@ function openA(id,start=0){
     :`<div class="slide"><img class="bl" alt="" src="${it.src}"><img class="m" alt="${esc(a.title)}" src="${it.src}" loading="lazy"></div>`).join('');
   thumbs.innerHTML=a.items.map((it,k)=>`<button aria-label="Go to ${k+1}"><img alt="" src="${it.poster||it.src}"></button>`).join('');
   [...thumbs.children].forEach((t,k)=>t.onclick=()=>go(k));
-  document.body.classList.add('open');go(start);
+  $('#adm').hidden=!ADMIN;document.body.classList.add('open');go(start);
   requestAnimationFrame(()=>requestAnimationFrame(()=>track.style.transition=''));
 }
 function closeA(){document.body.classList.remove('open');cur=null;document.querySelectorAll('video').forEach(v=>v.pause())}
@@ -206,7 +215,40 @@ $('#go').onclick=async()=>{
     renderGrid();if(cur&&cur.id===slug)openA(slug,cur.items.length-1)}
 };
 
+/* ---------- Edit / delete ---------- */
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),5000)}
+async function admin(body){
+  if(!PW){PW=prompt('Admin password')||'';if(!PW)return{ok:false,error:'Cancelled.'}}
+  const r=await post({password:PW,...body});
+  if(r.ok)sessionStorage.setItem('gpw',PW);else if(/password/i.test(r.error||'')){PW='';sessionStorage.removeItem('gpw')}
+  return r;
+}
+const LIVE=' It goes live for everyone in about a minute.';
+$('#ren').onclick=async()=>{
+  const n=(prompt('New album name',cur.title)||'').trim();if(!n||n===cur.title)return;
+  const r=await admin({action:'rename-album',album:cur.id,newName:n});
+  if(!r.ok)return toast(r.error||'Rename failed.');
+  cur.title=n;cur.id=r.album;renderGrid();location.hash=cur.id;toast('Album renamed.'+LIVE);
+};
+$('#dph').onclick=async()=>{
+  const it=cur.items[i];
+  if(it.src.startsWith('data:'))return toast('This photo was just uploaded. Wait a minute, refresh the page, then delete it.');
+  if(!confirm('Delete this photo permanently?'))return;
+  const r=await admin({action:'delete-photo',album:cur.id,file:it.src.split('/').pop()});
+  if(!r.ok)return toast(r.error||'Delete failed.');
+  cur.items.splice(i,1);
+  if(r.albumRemoved||!cur.items.length){ALBUMS=ALBUMS.filter(a=>a!==cur);renderGrid();location.hash=''}
+  else{renderGrid();openA(cur.id,Math.min(i,cur.items.length-1))}
+  toast('Photo deleted.'+LIVE);
+};
+$('#dal').onclick=async()=>{
+  if(!confirm(`Delete the whole album "${cur.title}" and all its photos? This cannot be undone.`))return;
+  const r=await admin({action:'delete-album',album:cur.id});
+  if(!r.ok)return toast(r.error||'Delete failed.');
+  ALBUMS=ALBUMS.filter(a=>a!==cur);renderGrid();location.hash='';toast('Album deleted.'+LIVE);
+};
+
 /* ---------- Start ---------- */
 buildMenu();
-fetch('gallery.json').then(r=>r.json()).then(d=>{ALBUMS=d;renderGrid();route()}).catch(()=>{grid.innerHTML='<p style="color:var(--mute)">Gallery could not be loaded.</p>'});
+fetch('gallery.json',{cache:'no-store'}).then(r=>r.json()).then(d=>{ALBUMS=d;renderGrid();route()}).catch(()=>{grid.innerHTML='<p style="color:var(--mute)">Gallery could not be loaded.</p>'});
 </script></body></html>
